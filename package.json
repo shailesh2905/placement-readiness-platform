@@ -1,0 +1,13 @@
+{
+  "name": "placement-readiness-platform",
+  "version": "1.0.0",
+  "description": "AI Placement Readiness & Skill Gap Recommendation Platform",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "echo \"Run dev scripts for individual workspaces\""
+  }
+}
