@@ -7,10 +7,10 @@ export default function StudentLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token || user?.role !== 'STUDENT') {
+    if (!token) {
       navigate('/login');
     }
-  }, [token, user, navigate]);
+  }, [token, navigate]);
 
   const handleLogout = () => {
     logout();
