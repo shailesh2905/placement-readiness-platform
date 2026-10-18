@@ -117,7 +117,7 @@ export default function AdminDashboard() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 flex flex-col md:flex-row justify-between md:items-center gap-6">
           <div>
             <div className="inline-flex items-center space-x-2 text-primary-600 font-bold text-xs uppercase tracking-wider mb-1">
-              <span>Phase 12 Administrative Engine</span>
+              <span>Placement Cell Executive Intelligence</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-navy-900">
               Training & Placement Cell (TPO) Hub

@@ -108,7 +108,7 @@ export default function LearningPlan() {
           <div>
             <div className="inline-flex items-center space-x-2 text-primary-300 font-bold text-xs uppercase tracking-wider mb-2">
               <span className="w-2 h-2 rounded-full bg-primary-400 animate-pulse"></span>
-              <span>Phase 8 & 9 Engines Active</span>
+              <span>Target Role Skill Deficit Roadmap</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
               Personalized Learning Roadmap

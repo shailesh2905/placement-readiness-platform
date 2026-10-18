@@ -106,12 +106,38 @@ export default function Dashboard() {
                 Calibrated Readiness Score
               </h3>
               
-              <div className="relative w-48 h-48 flex items-center justify-center rounded-full border-[12px] border-slate-100 shadow-inner">
-                <div 
-                  className="absolute inset-0 rounded-full border-[12px] border-primary-500 transition-all duration-1000"
-                  style={{ clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 ${100 - readiness.readiness_score}%)` }}
-                ></div>
-                <div className="text-center bg-white rounded-full w-36 h-36 flex flex-col items-center justify-center shadow-xs">
+              {/* Smooth Animated SVG Radial Gauge */}
+              <div className="relative w-48 h-48 flex items-center justify-center">
+                <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="#f1f5f9"
+                    strokeWidth="8"
+                    fill="transparent"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="url(#readinessGradient)"
+                    strokeWidth="8"
+                    strokeDasharray={2 * Math.PI * 40}
+                    strokeDashoffset={(2 * Math.PI * 40) * (1 - score / 100)}
+                    strokeLinecap="round"
+                    fill="transparent"
+                    className="transition-all duration-1000 ease-out"
+                  />
+                  <defs>
+                    <linearGradient id="readinessGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#4f46e5" />
+                      <stop offset="100%" stopColor="#06b6d4" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+
+                <div className="absolute text-center bg-white rounded-full w-32 h-32 flex flex-col items-center justify-center shadow-xs">
                   <span className="text-4xl font-black text-navy-900">{Math.round(readiness.readiness_score)}</span>
                   <span className="text-xs font-bold text-slate-400 block">/ 100</span>
                 </div>
@@ -153,14 +179,36 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* PHASE 13: ADVANCED ANALYTICS & DOMAIN RADAR BREAKDOWN */}
+          {/* CAMPUS RECRUITMENT DRIVES SPOTLIGHT */}
+          <div className="bg-gradient-to-r from-navy-900 via-primary-950 to-primary-900 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <div className="inline-flex items-center space-x-2 text-primary-300 font-bold text-xs uppercase tracking-wider mb-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Active Campus Placement Season</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black">
+                6 Top Tier Recruitment Drives Active
+              </h3>
+              <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-xl">
+                Amazon, Microsoft, TCS Digital, Infosys, Deloitte & Zoho are visiting campus. Check your real-time AI eligibility and apply today.
+              </p>
+            </div>
+            <Link
+              to="/student/drives"
+              className="px-6 py-3 bg-primary-600 hover:bg-primary-700 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-primary-500/25 transition whitespace-nowrap"
+            >
+              Check Drive Eligibility →
+            </Link>
+          </div>
+
+          {/* ADVANCED ANALYTICS & DOMAIN BENCHMARKS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Domain Competency Sliders */}
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-5">
               <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
                 <div>
                   <div className="inline-flex items-center space-x-2 text-primary-600 font-bold text-xs uppercase tracking-wider">
-                    <span>Phase 13 Domain Analytics</span>
+                    <span>Target Role Benchmarks</span>
                   </div>
                   <h3 className="text-lg font-extrabold text-navy-900">Domain Competency Benchmarks</h3>
                 </div>
@@ -189,9 +237,9 @@ export default function Dashboard() {
             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-200/80 space-y-5">
               <div className="border-b border-slate-100 pb-3">
                 <div className="inline-flex items-center space-x-2 text-primary-600 font-bold text-xs uppercase tracking-wider">
-                  <span>Phase 13 Growth Trends</span>
+                  <span>Progress Velocity</span>
                 </div>
-                <h3 className="text-lg font-extrabold text-navy-900">Readiness Score Progression</h3>
+                <h3 className="text-lg font-extrabold text-navy-900">Readiness Score Trajectory</h3>
               </div>
 
               <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
@@ -259,8 +307,8 @@ export default function Dashboard() {
                 <span className="font-extrabold text-navy-900 block mt-0.5">Software Development Engineer</span>
               </div>
               <div>
-                <span className="text-slate-400 font-semibold block">Institution</span>
-                <span className="font-extrabold text-navy-900 block mt-0.5">Hindustan University</span>
+                <span className="text-slate-400 font-semibold block">Academic Cohort</span>
+                <span className="font-extrabold text-navy-900 block mt-0.5">Engineering Batch 2026</span>
               </div>
             </div>
 

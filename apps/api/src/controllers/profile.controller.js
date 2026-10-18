@@ -210,3 +210,161 @@ export const uploadResume = async (req, res) => {
   }
 };
 
+// ============================================
+// Projects CRUD
+// ============================================
+export const addProject = async (req, res) => {
+  const { name, description, technologies, githubUrl, liveUrl } = req.body;
+  if (!name || !description) {
+    return res.status(400).json({ success: false, message: 'Project name and description are required.' });
+  }
+
+  try {
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
+    if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
+
+    const project = await prisma.project.create({
+      data: {
+        profileId: profile.id,
+        name,
+        description,
+        technologies: technologies || '',
+        githubUrl: githubUrl || null,
+        liveUrl: liveUrl || null
+      }
+    });
+
+    res.status(201).json({ success: true, data: project });
+  } catch (error) {
+    console.error('Add Project Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to add project' });
+  }
+};
+
+export const deleteProject = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
+    if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
+
+    await prisma.project.deleteMany({
+      where: { id, profileId: profile.id }
+    });
+
+    res.json({ success: true, message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error('Delete Project Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete project' });
+  }
+};
+
+// ============================================
+// Experience / Internships CRUD
+// ============================================
+export const addExperience = async (req, res) => {
+  const { organization, role, duration, responsibilities } = req.body;
+  if (!organization || !role) {
+    return res.status(400).json({ success: false, message: 'Organization and role are required.' });
+  }
+
+  try {
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
+    if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
+
+    const exp = await prisma.experience.create({
+      data: {
+        profileId: profile.id,
+        organization,
+        role,
+        duration: duration || '3 Months',
+        responsibilities: responsibilities || ''
+      }
+    });
+
+    res.status(201).json({ success: true, data: exp });
+  } catch (error) {
+    console.error('Add Experience Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to add experience' });
+  }
+};
+
+export const deleteExperience = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
+    if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
+
+    await prisma.experience.deleteMany({
+      where: { id, profileId: profile.id }
+    });
+
+    res.json({ success: true, message: 'Experience deleted successfully' });
+  } catch (error) {
+    console.error('Delete Experience Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete experience' });
+  }
+};
+
+// ============================================
+// Manual Skill Management
+// ============================================
+export const addSkillManual = async (req, res) => {
+  const { name, level = 'INTERMEDIATE', category = 'TECHNICAL' } = req.body;
+  if (!name || !name.trim()) {
+    return res.status(400).json({ success: false, message: 'Skill name is required.' });
+  }
+
+  try {
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
+    if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
+
+    const cleanName = name.trim();
+    const skillRecord = await prisma.skill.upsert({
+      where: { name: cleanName },
+      update: {},
+      create: { name: cleanName, category }
+    });
+
+    const studentSkill = await prisma.studentSkill.upsert({
+      where: {
+        profileId_skillId: {
+          profileId: profile.id,
+          skillId: skillRecord.id
+        }
+      },
+      update: { level },
+      create: {
+        profileId: profile.id,
+        skillId: skillRecord.id,
+        level
+      },
+      include: { skill: true }
+    });
+
+    res.status(201).json({ success: true, data: studentSkill });
+  } catch (error) {
+    console.error('Add Skill Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to add skill' });
+  }
+};
+
+export const deleteSkill = async (req, res) => {
+  const { skillId } = req.params;
+  try {
+    const profile = await prisma.profile.findUnique({ where: { userId: req.user.id } });
+    if (!profile) return res.status(404).json({ success: false, message: 'Profile not found' });
+
+    await prisma.studentSkill.deleteMany({
+      where: {
+        profileId: profile.id,
+        skillId
+      }
+    });
+
+    res.json({ success: true, message: 'Skill removed successfully' });
+  } catch (error) {
+    console.error('Delete Skill Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to remove skill' });
+  }
+};
+

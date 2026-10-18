@@ -116,7 +116,7 @@ export default function MentorDashboard() {
         <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/80 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div>
             <div className="inline-flex items-center space-x-2 text-primary-600 font-bold text-xs uppercase tracking-wider mb-1">
-              <span>Phase 11 Supervision Engine</span>
+              <span>Candidate Mentorship & Mock Review</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-navy-900">
               Assigned Mentee Supervision & Feedback
