@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # 1. React Web Application
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  # 2. Node.js Express REST API
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=placement_readiness_production_key_2026
+      - ML_API_URL=http://ml-service:8001
+    restart: unless-stopped
+    depends_on:
+      - ml-service
+
+  # 3. Python FastAPI ML Microservice (SHAP + XGBoost/RandomForest)
+  ml-service:
+    build:
+      context: ./services/ml-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  # 4. MySQL Relational Database (Optional Production Store)
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: placement_readiness_db
+      MYSQL_USER: placement_user
+      MYSQL_PASSWORD: placement_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  mysql_data:
