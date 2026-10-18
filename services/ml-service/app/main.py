@@ -1,10 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import pandas as pd
 import numpy as np
 import shap
 import os
+import re
+import PyPDF2
 from app.schemas import StudentFeatures, ReadinessResponse
 
 app = FastAPI(
@@ -120,3 +122,109 @@ def predict_readiness(features: StudentFeatures):
         "top_gaps": top_gaps,
         "recommendations": recommendations
     }
+
+@app.post("/parse-resume")
+async def parse_resume(file: UploadFile = File(...)):
+    # 1. Read PDF
+    try:
+        pdf_reader = PyPDF2.PdfReader(file.file)
+        text = ""
+        for page in pdf_reader.pages:
+            extracted = page.extract_text()
+            if extracted:
+                text += extracted + "\n"
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read PDF: {str(e)}")
+
+    if not text.strip():
+        raise HTTPException(status_code=400, detail="The PDF file appears to be empty or unscannable.")
+
+    text_lower = text.lower()
+
+    # 2. Comprehensive Skill Database
+    skills_map = {
+        "Python": r'\bpython\b',
+        "Java": r'\bjava\b',
+        "C++": r'\bc\+\+\b',
+        "C": r'\bc\b',
+        "JavaScript": r'\bjavascript\b|\bjs\b',
+        "TypeScript": r'\btypescript\b|\bts\b',
+        "React": r'\breact\b|\breact\.?js\b',
+        "Node.js": r'\bnode\b|\bnode\.?js\b',
+        "Express": r'\bexpress\b|\bexpress\.?js\b',
+        "SQL": r'\bsql\b',
+        "MySQL": r'\bmysql\b',
+        "PostgreSQL": r'\bpostgres(ql)?\b',
+        "MongoDB": r'\bmongodb\b|\bmongo\b',
+        "Docker": r'\bdocker\b',
+        "Kubernetes": r'\bkubernetes\b|\bk8s\b',
+        "AWS": r'\baws\b|\bamazon web services\b',
+        "Machine Learning": r'\bmachine learning\b|\bml\b',
+        "Deep Learning": r'\bdeep learning\b|\bdl\b',
+        "Data Structures & Algorithms": r'\bdsa\b|\bdata structures\b',
+        "HTML/CSS": r'\bhtml\b|\bcss\b',
+        "Git": r'\bgit\b|\bgithub\b',
+        "Linux": r'\blinux\b|\bunix\b',
+        "FastAPI": r'\bfastapi\b',
+        "Django": r'\bdjango\b',
+        "Flask": r'\bflask\b',
+        "Pandas": r'\bpandas\b',
+        "NumPy": r'\bnumpy\b',
+        "Tailwind CSS": r'\btailwind\b',
+        "Next.js": r'\bnext\.?js\b'
+    }
+
+    extracted_skills = []
+    for skill_name, pattern in skills_map.items():
+        if re.search(pattern, text_lower):
+            extracted_skills.append(skill_name)
+
+    # 3. Heuristic Extraction for Projects & Experience
+    projects_count = max(len(re.findall(r'\b(project|projects|capstone)\b', text_lower)), 0)
+    internships_count = max(len(re.findall(r'\b(intern|internship|trainee|apprentice)\b', text_lower)), 0)
+    certifications_count = max(len(re.findall(r'\b(certified|certification|certificate|credential)\b', text_lower)), 0)
+
+    # Normalized estimates
+    estimated_projects = min(max(projects_count // 2, 1) if "project" in text_lower else 0, 8)
+    estimated_internships = min(max(internships_count // 2, 1) if "intern" in text_lower else 0, 5)
+
+    # 4. Extract Contact Info
+    email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', text)
+    phone_match = re.search(r'(?:\+?91[\-\s]?)?[6-9]\d{9}', text) or re.search(r'\+?\d{10,13}', text)
+
+    email = email_match.group(0) if email_match else None
+    phone = phone_match.group(0) if phone_match else None
+
+    # 5. Extract Education Degree
+    education_degree = None
+    if re.search(r'\bm\.?tech\b|\bmaster of technology\b', text_lower):
+        education_degree = "M.Tech"
+    elif re.search(r'\bb\.?tech\b|\bbachelor of technology\b|\bb\.?e\b', text_lower):
+        education_degree = "B.Tech"
+    elif re.search(r'\bmca\b|\bmaster of computer applications\b', text_lower):
+        education_degree = "MCA"
+    elif re.search(r'\bbca\b|\bbachelor of computer applications\b', text_lower):
+        education_degree = "BCA"
+    elif re.search(r'\bb\.?sc\b|\bbachelor of science\b', text_lower):
+        education_degree = "B.Sc"
+
+    # 6. Extract CGPA/Percentage if mentioned
+    cgpa_match = re.search(r'\b(?:cgpa|gpa|pointer)[\s:]*([0-9]\.[0-9]{1,2}|10(?:\.0)?)\b', text_lower)
+    extracted_cgpa = float(cgpa_match.group(1)) if cgpa_match else None
+
+    return {
+        "success": True,
+        "data": {
+            "email": email,
+            "phone": phone,
+            "skills": extracted_skills,
+            "education_degree": education_degree,
+            "extracted_cgpa": extracted_cgpa,
+            "projects_estimated": estimated_projects,
+            "internships_estimated": estimated_internships,
+            "certifications_estimated": certifications_count,
+            "raw_text_length": len(text)
+        }
+    }
+
+
