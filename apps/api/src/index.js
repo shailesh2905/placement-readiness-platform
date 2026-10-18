@@ -6,6 +6,8 @@ import profileRoutes from './routes/profile.routes.js';
 import assessmentRoutes from './routes/assessment.routes.js';
 import readinessRoutes from './routes/readiness.routes.js';
 import learningPlanRoutes from './routes/learningPlan.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import mentorRoutes from './routes/mentor.routes.js';
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.use('/api/v1/student/profile', profileRoutes);
 app.use('/api/v1/assessments', assessmentRoutes);
 app.use('/api/v1/readiness', readinessRoutes);
 app.use('/api/v1/learning-plan', learningPlanRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/mentor', mentorRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'API is healthy' });
