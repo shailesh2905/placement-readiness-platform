@@ -11,6 +11,7 @@ import Profile from './pages/student/Profile';
 import Assessments from './pages/student/Assessments';
 import AssessmentTake from './pages/student/AssessmentTake';
 import AssessmentResult from './pages/student/AssessmentResult';
+import LearningPlan from './pages/student/LearningPlan';
 
 function LandingPage() {
   return (
@@ -94,7 +95,7 @@ function App() {
           <Route path="assessments" element={<Assessments />} />
           <Route path="assessments/:id" element={<AssessmentTake />} />
           <Route path="assessments/result/:attemptId" element={<AssessmentResult />} />
-          <Route path="learning-plan" element={<div className="p-4 bg-white shadow rounded-lg text-slate-600">Learning Plan Module Coming Soon</div>} />
+          <Route path="learning-plan" element={<LearningPlan />} />
         </Route>
 
         {/* Catch-all 404 Route */}
